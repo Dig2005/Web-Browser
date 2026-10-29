@@ -1,3 +1,5 @@
+import { AuthProvider } from "./context/AuthContext";
+
 import { BookmarkProvider } from "./context/BookmarkContext";
 
 import { BrowserProvider } from "./context/BrowserContext";
@@ -10,15 +12,17 @@ import BrowserLayout from "./layouts/BrowserLayout/BrowserLayout";
 
 function App() {
   return (
-    <BrowserProvider>
-      <BookmarkProvider>
-        <HistoryProvider>
-          <DownloadProvider>
-            <BrowserLayout />
-          </DownloadProvider>
-        </HistoryProvider>
-      </BookmarkProvider>
-    </BrowserProvider>
+    <AuthProvider>
+      <BrowserProvider>
+        <BookmarkProvider>
+          <HistoryProvider>
+            <DownloadProvider>
+              <BrowserLayout />
+            </DownloadProvider>
+          </HistoryProvider>
+        </BookmarkProvider>
+      </BrowserProvider>
+    </AuthProvider>
   );
 }
 

@@ -11,6 +11,9 @@ import {
 import { STORAGE_KEYS } from "../constants/storageKeys";
 
 import { getStoredData, saveStoredData } from "../utils/storage";
+import { useAuth } from "./AuthContext";
+
+import { fetchSettings, updateSettings } from "../services/settingService";
 
 const BrowserContext = createContext(null);
 
@@ -144,8 +147,21 @@ function createRestoredTab(savedTab) {
 
   return tab;
 }
-
+function normalizeRemoteSettings(remote, local) {
+  return {
+    ...DEFAULT_SETTINGS,
+    ...local,
+    searchEngine: remote?.searchEngine ?? local.searchEngine,
+    theme: remote?.theme ?? local.theme,
+    startupMode: remote?.startupMode ?? local.startupMode,
+    startupUrl: remote?.startupUrl ?? local.startupUrl,
+    askDownloadLocation:
+      remote?.askDownloadLocation ?? local.askDownloadLocation,
+    switchToNewTab: remote?.switchToNewTab ?? local.switchToNewTab,
+  };
+}
 export function BrowserProvider({ children }) {
+  const { isAuthenticated, user } = useAuth();
   const [settings, setSettings] = useState(() => {
     const stored = getStoredData(STORAGE_KEYS.settings, {});
 
@@ -155,7 +171,11 @@ export function BrowserProvider({ children }) {
       ...(stored && typeof stored === "object" ? stored : {}),
     };
   });
+  const [settingsSyncing, setSettingsSyncing] = useState(false);
 
+  const [settingsSyncError, setSettingsSyncError] = useState("");
+
+  const accountSettingsLoadedRef = useRef(false);
   const searchEngine = ["google", "bing", "duckduckgo"].includes(
     settings.searchEngine,
   )
@@ -183,44 +203,136 @@ export function BrowserProvider({ children }) {
   const switchToNewTab = settings.switchToNewTab !== false;
 
   const newTabPage = settings.newTabPage === "home" ? "home" : "home";
+  useEffect(() => {
+    let cancelled = false;
 
-  const setSearchEngine = useCallback((engine) => {
-    const allowedEngines = ["google", "bing", "duckduckgo"];
+    const loadAccountSettings = async () => {
+      if (!isAuthenticated) {
+        accountSettingsLoadedRef.current = false;
 
-    if (!allowedEngines.includes(engine)) {
-      return;
-    }
+        setSettingsSyncError("");
 
-    setSettings((current) => {
-      const next = {
-        ...current,
-        searchEngine: engine,
-      };
+        const local = getStoredData(STORAGE_KEYS.settings, {});
 
-      saveStoredData(STORAGE_KEYS.settings, next);
+        if (!cancelled) {
+          setSettings({
+            ...DEFAULT_SETTINGS,
 
-      return next;
-    });
-  }, []);
+            ...(local && typeof local === "object" ? local : {}),
+          });
+        }
 
-  const setTheme = useCallback((nextTheme) => {
-    const allowedThemes = ["dark", "light", "system"];
+        return;
+      }
 
-    if (!allowedThemes.includes(nextTheme)) {
-      return;
-    }
+      setSettingsSyncing(true);
 
-    setSettings((current) => {
-      const next = {
-        ...current,
-        theme: nextTheme,
-      };
+      setSettingsSyncError("");
 
-      saveStoredData(STORAGE_KEYS.settings, next);
+      try {
+        const remote = await fetchSettings();
 
-      return next;
-    });
-  }, []);
+        if (cancelled) {
+          return;
+        }
+
+        setSettings((current) => normalizeRemoteSettings(remote, current));
+
+        accountSettingsLoadedRef.current = true;
+      } catch (requestError) {
+        if (!cancelled) {
+          setSettingsSyncError(
+            requestError?.message || "Unable to load account settings.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setSettingsSyncing(false);
+        }
+      }
+    };
+
+    loadAccountSettings();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, user?.id]);
+  const persistSettings = useCallback(
+    async (nextSettings) => {
+      saveStoredData(STORAGE_KEYS.settings, nextSettings);
+
+      if (!isAuthenticated || !accountSettingsLoadedRef.current) {
+        return;
+      }
+
+      try {
+        setSettingsSyncError("");
+
+        await updateSettings({
+          searchEngine: nextSettings.searchEngine,
+
+          theme: nextSettings.theme,
+
+          startupMode: nextSettings.startupMode,
+
+          startupUrl: nextSettings.startupUrl,
+
+          askDownloadLocation: nextSettings.askDownloadLocation,
+
+          switchToNewTab: nextSettings.switchToNewTab,
+        });
+      } catch (requestError) {
+        setSettingsSyncError(
+          requestError?.message || "Unable to synchronize settings.",
+        );
+      }
+    },
+    [isAuthenticated],
+  );
+  const setSearchEngine = useCallback(
+    (engine) => {
+      const allowedEngines = ["google", "bing", "duckduckgo"];
+
+      if (!allowedEngines.includes(engine)) {
+        return;
+      }
+
+      setSettings((current) => {
+        const next = {
+          ...current,
+          searchEngine: engine,
+        };
+
+        persistSettings(next);
+
+        return next;
+      });
+    },
+    [persistSettings],
+  );
+
+  const setTheme = useCallback(
+    (nextTheme) => {
+      const allowedThemes = ["dark", "light", "system"];
+
+      if (!allowedThemes.includes(nextTheme)) {
+        return;
+      }
+
+      setSettings((current) => {
+        const next = {
+          ...current,
+          theme: nextTheme,
+        };
+
+        persistSettings(next);
+
+        return next;
+      });
+    },
+    [persistSettings],
+  );
 
   const [systemTheme, setSystemTheme] = useState(() => {
     if (typeof window === "undefined" || !window.matchMedia) {
@@ -255,38 +367,43 @@ export function BrowserProvider({ children }) {
 
     document.documentElement.style.colorScheme = resolvedTheme;
   }, [resolvedTheme]);
+  const setStartupMode = useCallback(
+    (mode) => {
+      const allowedModes = ["home", "continue", "custom"];
 
-  const setStartupMode = useCallback((mode) => {
-    const allowedModes = ["home", "continue", "custom"];
+      if (!allowedModes.includes(mode)) {
+        return;
+      }
 
-    if (!allowedModes.includes(mode)) {
-      return;
-    }
+      setSettings((current) => {
+        const next = {
+          ...current,
+          startupMode: mode,
+        };
 
-    setSettings((current) => {
-      const next = {
-        ...current,
-        startupMode: mode,
-      };
+        persistSettings(next);
 
-      saveStoredData(STORAGE_KEYS.settings, next);
+        return next;
+      });
+    },
+    [persistSettings],
+  );
+  const setStartupUrl = useCallback(
+    (url) => {
+      setSettings((current) => {
+        const next = {
+          ...current,
 
-      return next;
-    });
-  }, []);
+          startupUrl: typeof url === "string" ? url : "",
+        };
 
-  const setStartupUrl = useCallback((url) => {
-    setSettings((current) => {
-      const next = {
-        ...current,
-        startupUrl: typeof url === "string" ? url : "",
-      };
+        persistSettings(next);
 
-      saveStoredData(STORAGE_KEYS.settings, next);
-
-      return next;
-    });
-  }, []);
+        return next;
+      });
+    },
+    [persistSettings],
+  );
 
   const setDownloadPath = useCallback((path) => {
     setSettings((current) => {
@@ -301,19 +418,22 @@ export function BrowserProvider({ children }) {
     });
   }, []);
 
-  const setAskDownloadLocation = useCallback((enabled) => {
-    setSettings((current) => {
-      const next = {
-        ...current,
+  const setAskDownloadLocation = useCallback(
+    (enabled) => {
+      setSettings((current) => {
+        const next = {
+          ...current,
 
-        askDownloadLocation: Boolean(enabled),
-      };
+          askDownloadLocation: Boolean(enabled),
+        };
 
-      saveStoredData(STORAGE_KEYS.settings, next);
+        persistSettings(next);
 
-      return next;
-    });
-  }, []);
+        return next;
+      });
+    },
+    [persistSettings],
+  );
 
   const chooseDownloadFolder = useCallback(async () => {
     const result =
@@ -326,19 +446,22 @@ export function BrowserProvider({ children }) {
     setDownloadPath(result.path);
   }, [setDownloadPath]);
 
-  const setSwitchToNewTab = useCallback((enabled) => {
-    setSettings((current) => {
-      const next = {
-        ...current,
+  const setSwitchToNewTab = useCallback(
+    (enabled) => {
+      setSettings((current) => {
+        const next = {
+          ...current,
 
-        switchToNewTab: Boolean(enabled),
-      };
+          switchToNewTab: Boolean(enabled),
+        };
 
-      saveStoredData(STORAGE_KEYS.settings, next);
+        persistSettings(next);
 
-      return next;
-    });
-  }, []);
+        return next;
+      });
+    },
+    [persistSettings],
+  );
 
   const initialSessionRef = useRef(undefined);
 
@@ -1428,7 +1551,8 @@ export function BrowserProvider({ children }) {
       activeTabId,
 
       settings,
-
+      settingsSyncing,
+      settingsSyncError,
       searchEngine,
       setSearchEngine,
 
@@ -1497,7 +1621,8 @@ export function BrowserProvider({ children }) {
       activeTabId,
 
       settings,
-
+      settingsSyncing,
+      settingsSyncError,
       searchEngine,
       setSearchEngine,
 

@@ -1,10 +1,10 @@
 import { apiRequest } from "./api";
 
-export function getSettings() {
+export function fetchSettings() {
   return apiRequest("/settings");
 }
 
-export function saveSettings(settings) {
+export function updateSettings(settings) {
   return apiRequest("/settings", {
     method: "PUT",
 

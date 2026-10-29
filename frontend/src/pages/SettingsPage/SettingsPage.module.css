@@ -706,3 +706,180 @@
     background: rgba(61, 114, 194, 0.2);
     font-size: 9px;
 }
+
+.accountSignedIn {
+    display: grid;
+    grid-template-columns:
+        48px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 13px;
+    padding: 14px;
+    border: 1px solid rgba(91, 105, 191, 0.25);
+    border-radius: 13px;
+    background: rgba(17, 28, 77, 0.58);
+}
+
+.accountAvatar {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    place-items: center;
+    border-radius: 14px;
+    color: #82ddff;
+    background:
+        linear-gradient(135deg,
+            rgba(43, 102, 186, 0.62),
+            rgba(91, 61, 177, 0.56));
+}
+
+.accountInformation {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.accountInformation strong {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+.accountInformation span {
+    overflow: hidden;
+    color: #929bc5;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.signedInBadge {
+    padding: 6px 9px;
+    border-radius: 999px;
+    color: #83e6c1;
+    background: rgba(45, 166, 119, 0.14);
+    font-size: 9px;
+    font-weight: 650;
+}
+
+.signOutButton {
+    display: flex;
+    min-height: 35px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 12px;
+    border: 1px solid rgba(231, 92, 111, 0.28);
+    border-radius: 9px;
+    color: #ffb5c0;
+    background: rgba(133, 31, 55, 0.15);
+    cursor: pointer;
+}
+
+.signOutButton:hover {
+    color: #ffffff;
+    background: rgba(166, 43, 67, 0.28);
+}
+
+.accountSignedOut {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid rgba(91, 105, 191, 0.25);
+    border-radius: 13px;
+    background: rgba(17, 28, 77, 0.58);
+}
+
+.accountMessage {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.accountMessage>div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.accountMessage strong {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+.accountMessage p {
+    margin: 0;
+    color: #929bc5;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.accountActions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.accountPrimaryButton,
+.accountSecondaryButton {
+    display: flex;
+    min-height: 37px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.accountPrimaryButton {
+    border: 0;
+    color: #ffffff;
+    background:
+        linear-gradient(135deg,
+            #288fd5,
+            #7056dd);
+}
+
+.accountSecondaryButton {
+    border: 1px solid rgba(92, 148, 225, 0.34);
+    color: #dce7ff;
+    background: rgba(43, 76, 153, 0.25);
+}
+
+.accountPrimaryButton:hover {
+    filter: brightness(1.08);
+}
+
+.accountSecondaryButton:hover {
+    color: #ffffff;
+    background: rgba(53, 92, 181, 0.4);
+}
+
+.signOutButton:focus-visible,
+.accountPrimaryButton:focus-visible,
+.accountSecondaryButton:focus-visible {
+    outline: 2px solid #64d6ff;
+    outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+    .accountSignedIn {
+        grid-template-columns:
+            48px minmax(0, 1fr);
+    }
+
+    .signedInBadge,
+    .signOutButton {
+        grid-column: 2;
+        justify-self: start;
+    }
+
+    .accountActions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

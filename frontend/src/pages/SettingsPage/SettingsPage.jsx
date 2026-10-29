@@ -2,13 +2,20 @@ import {
   ArrowLeft,
   ChevronRight,
   Download,
+  LogIn,
+  LogOut,
   Monitor,
   PanelTop,
   Rocket,
   Search,
   Settings,
+  UserCircle,
+  UserPlus,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import LoginPage from "../LoginPage/LoginPage";
+import RegisterPage from "../RegisterPage/RegisterPage";
 import { useBrowser } from "../../context/BrowserContext";
 import styles from "./SettingsPage.module.css";
 function SettingsPage({ onBackHome }) {
@@ -29,8 +36,17 @@ function SettingsPage({ onBackHome }) {
     switchToNewTab,
     setSwitchToNewTab,
   } = useBrowser();
+  const { user, isAuthenticated, logout } = useAuth();
   const [activeSection, setActiveSection] = useState(null);
+  const [authView, setAuthView] = useState(null);
   const sections = [
+    {
+      id: "account",
+      icon: UserCircle,
+      title: "Account",
+      description:
+        "Sign in to access your Safora account and synchronized browser data.",
+    },
     {
       id: "search",
       icon: Search,
@@ -42,28 +58,24 @@ function SettingsPage({ onBackHome }) {
       icon: Monitor,
       title: "Appearance",
       description: "Customize Safora's theme and visual preferences.",
-      status: "Coming next",
     },
     {
       id: "startup",
       icon: Rocket,
       title: "On Startup",
       description: "Choose what Safora should open when the browser starts.",
-      status: "Coming next",
     },
     {
       id: "downloads",
       icon: Download,
       title: "Downloads",
       description: "Manage download preferences and download behavior.",
-      status: "Coming next",
     },
     {
       id: "tabs",
       icon: PanelTop,
       title: "Tabs",
       description: "Control how new tabs and browser tabs behave.",
-      status: "Coming next",
     },
   ];
   const searchEngines = [
@@ -95,14 +107,18 @@ function SettingsPage({ onBackHome }) {
   };
   const handleSectionClick = (sectionId) => {
     const availableSections = [
+      "account",
       "search",
       "appearance",
       "startup",
       "downloads",
       "tabs",
     ];
+
     if (availableSections.includes(sectionId)) {
       setActiveSection(sectionId);
+
+      setAuthView(null);
     }
   };
   const themeOptions = [
@@ -172,7 +188,100 @@ function SettingsPage({ onBackHome }) {
           </p>
         </div>
       </div>
+      {activeSection === "account" && !authView && (
+        <section className={styles.settingPanel}>
+          <div className={styles.settingPanelHeader}>
+            <div>
+              <h2>Safora Account</h2>
 
+              <p>Manage your Safora account and synchronized browser data.</p>
+            </div>
+
+            <button
+              type="button"
+              className={styles.panelCloseButton}
+              onClick={() => setActiveSection(null)}
+            >
+              Done
+            </button>
+          </div>
+
+          {isAuthenticated ? (
+            <div className={styles.accountSignedIn}>
+              <div className={styles.accountAvatar}>
+                <UserCircle size={30} />
+              </div>
+
+              <div className={styles.accountInformation}>
+                <strong>{user?.name || "Safora User"}</strong>
+
+                <span>{user?.email || ""}</span>
+              </div>
+
+              <span className={styles.signedInBadge}>Signed in</span>
+
+              <button
+                type="button"
+                className={styles.signOutButton}
+                onClick={logout}
+              >
+                <LogOut size={16} />
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className={styles.accountSignedOut}>
+              <div className={styles.accountMessage}>
+                <div className={styles.accountAvatar}>
+                  <UserCircle size={30} />
+                </div>
+
+                <div>
+                  <strong>You're not signed in</strong>
+
+                  <p>
+                    Sign in or create an account to use your Safora account.
+                  </p>
+                </div>
+              </div>
+
+              <div className={styles.accountActions}>
+                <button
+                  type="button"
+                  className={styles.accountPrimaryButton}
+                  onClick={() => setAuthView("login")}
+                >
+                  <LogIn size={16} />
+                  Sign In
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.accountSecondaryButton}
+                  onClick={() => setAuthView("register")}
+                >
+                  <UserPlus size={16} />
+                  Create Account
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+      {activeSection === "account" && authView === "login" && (
+        <LoginPage
+          onRegister={() => setAuthView("register")}
+          onSuccess={() => setAuthView(null)}
+          onCancel={() => setAuthView(null)}
+        />
+      )}
+      {activeSection === "account" && authView === "register" && (
+        <RegisterPage
+          onLogin={() => setAuthView("login")}
+          onSuccess={() => setAuthView(null)}
+          onCancel={() => setAuthView(null)}
+        />
+      )}
       {activeSection === "search" && (
         <section className={styles.settingPanel}>
           <div className={styles.settingPanelHeader}>
@@ -468,26 +577,24 @@ function SettingsPage({ onBackHome }) {
       <div className={styles.settingsList}>
         {sections.map((section) => {
           const Icon = section.icon;
-
-          const isSearch = section.id === "search";
-
           let status = section.status;
-
+          if (section.id === "account") {
+            status = isAuthenticated
+              ? user?.name || "Signed in"
+              : "Not signed in";
+          }
           if (section.id === "search") {
             status = getSearchEngineLabel();
           }
-
           if (section.id === "appearance") {
             status = getThemeLabel();
           }
-
           return (
             <button
               key={section.id}
               type="button"
               className={styles.settingsCard}
               onClick={() => handleSectionClick(section.id)}
-              aria-disabled={!isSearch}
             >
               <span className={styles.settingIcon}>
                 <Icon size={21} />

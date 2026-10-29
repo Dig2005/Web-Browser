@@ -1,19 +1,20 @@
 import { apiRequest } from "./api";
 
-export function getBookmarks() {
+export function fetchBookmarks() {
   return apiRequest("/bookmarks");
 }
-
-export function addBookmark(bookmark) {
+export function createBookmark(bookmark) {
   return apiRequest("/bookmarks", {
     method: "POST",
-
-    body: JSON.stringify(bookmark),
+    body: JSON.stringify({
+      title: bookmark.title,
+      url: bookmark.url,
+      favicon: bookmark.favicon || null,
+    }),
   });
 }
-
-export function deleteBookmark(id) {
-  return apiRequest(`/bookmarks/${id}`, {
+export function deleteBookmark(bookmarkId) {
+  return apiRequest(`/bookmarks/${bookmarkId}`, {
     method: "DELETE",
   });
 }

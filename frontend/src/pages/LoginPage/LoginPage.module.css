@@ -1,0 +1,162 @@
+.authPage {
+    display: grid;
+    width: 100%;
+    min-height: 100%;
+    place-items: center;
+    padding: 32px 20px;
+    background:
+        linear-gradient(145deg,
+            #070a20,
+            #101a46);
+}
+
+.authCard {
+    display: flex;
+    width: min(420px, 100%);
+    flex-direction: column;
+    gap: 16px;
+    padding: 28px;
+    border: 1px solid rgba(94, 115, 218, 0.3);
+    border-radius: 22px;
+    background:
+        linear-gradient(145deg,
+            rgba(25, 32, 89, 0.96),
+            rgba(13, 22, 65, 0.97));
+    box-shadow:
+        0 22px 60px rgba(0, 4, 30, 0.35);
+}
+
+.logo {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    margin-bottom: 2px;
+    border-radius: 15px;
+    color: #ffffff;
+    background:
+        linear-gradient(135deg,
+            #27bdeb,
+            #7854e8);
+    font-size: 21px;
+    font-weight: 800;
+}
+
+.authCard h1 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 24px;
+}
+
+.subtitle {
+    margin: -8px 0 3px;
+    color: #9da7ce;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.field span {
+    color: #c7cdea;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.field input {
+    width: 100%;
+    height: 43px;
+    padding: 0 13px;
+    border: 1px solid rgba(87, 105, 198, 0.36);
+    border-radius: 10px;
+    outline: none;
+    color: #ffffff;
+    background: rgba(9, 17, 54, 0.7);
+    font: inherit;
+}
+
+.field input::placeholder {
+    color: #69739d;
+}
+
+.field input:focus {
+    border-color: #5edcff;
+    box-shadow:
+        0 0 0 3px rgba(94, 220, 255, 0.08);
+}
+
+.error {
+    margin: 0;
+    padding: 9px 11px;
+    border: 1px solid rgba(239, 92, 111, 0.31);
+    border-radius: 9px;
+    color: #ffb5bf;
+    background: rgba(133, 31, 55, 0.18);
+    font-size: 10px;
+}
+
+.primaryButton {
+    display: flex;
+    min-height: 43px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 0;
+    border-radius: 11px;
+    color: #ffffff;
+    background:
+        linear-gradient(135deg,
+            #288fd5,
+            #7056dd);
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.primaryButton:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.switchAccount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #858fb8;
+    font-size: 10px;
+}
+
+.switchAccount button {
+    padding: 0;
+    border: 0;
+    color: #67d6ff;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+}
+
+.cancelButton {
+    min-height: 38px;
+    border: 1px solid rgba(93, 108, 198, 0.28);
+    border-radius: 10px;
+    color: #aeb7db;
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+}
+
+.cancelButton:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.primaryButton:focus-visible,
+.cancelButton:focus-visible,
+.switchAccount button:focus-visible,
+.field input:focus-visible {
+    outline: 2px solid #64d6ff;
+    outline-offset: 2px;
+}

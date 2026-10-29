@@ -1,6 +1,10 @@
 import { apiRequest } from "./api";
 
-export function register(name, email, password) {
+const TOKEN_KEY = "safora-auth-token";
+
+const USER_KEY = "safora-user";
+
+export function registerUser(name, email, password) {
   return apiRequest("/auth/register", {
     method: "POST",
 
@@ -12,7 +16,7 @@ export function register(name, email, password) {
   });
 }
 
-export function login(email, password) {
+export function loginUser(email, password) {
   return apiRequest("/auth/login", {
     method: "POST",
 
@@ -23,11 +27,11 @@ export function login(email, password) {
   });
 }
 
-export function saveAuth(data) {
-  localStorage.setItem("safora-auth-token", data.token);
+export function saveAuthData(data) {
+  localStorage.setItem(TOKEN_KEY, data.token);
 
   localStorage.setItem(
-    "safora-user",
+    USER_KEY,
     JSON.stringify({
       id: data.userId,
 
@@ -38,8 +42,12 @@ export function saveAuth(data) {
   );
 }
 
+export function getStoredToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
 export function getStoredUser() {
-  const stored = localStorage.getItem("safora-user");
+  const stored = localStorage.getItem(USER_KEY);
 
   if (!stored) {
     return null;
@@ -52,12 +60,8 @@ export function getStoredUser() {
   }
 }
 
-export function getStoredToken() {
-  return localStorage.getItem("safora-auth-token");
-}
+export function clearAuthData() {
+  localStorage.removeItem(TOKEN_KEY);
 
-export function logout() {
-  localStorage.removeItem("safora-auth-token");
-
-  localStorage.removeItem("safora-user");
+  localStorage.removeItem(USER_KEY);
 }

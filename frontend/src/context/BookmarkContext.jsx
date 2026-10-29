@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -10,33 +11,112 @@ import { STORAGE_KEYS } from "../constants/storageKeys";
 
 import { getStoredData, saveStoredData } from "../utils/storage";
 
+import { useAuth } from "./AuthContext";
+
+import {
+  createBookmark,
+  deleteBookmark,
+  fetchBookmarks,
+} from "../services/bookmarkService";
+
 const BookmarkContext = createContext(null);
 
 function generateBookmarkId() {
   return `bookmark-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function getLocalBookmarks() {
+  const stored = getStoredData(STORAGE_KEYS.bookmarks, []);
+
+  return Array.isArray(stored) ? stored : [];
+}
+
 export function BookmarkProvider({ children }) {
-  const [bookmarks, setBookmarks] = useState(() =>
-    getStoredData(STORAGE_KEYS.bookmarks, []),
-  );
+  const { isAuthenticated, user } = useAuth();
 
-  const persistBookmarks = useCallback((nextBookmarks) => {
-    setBookmarks(nextBookmarks);
+  const [bookmarks, setBookmarks] = useState(getLocalBookmarks);
 
-    saveStoredData(STORAGE_KEYS.bookmarks, nextBookmarks);
-  }, []);
+  const [loading, setLoading] = useState(false);
 
-  const addBookmark = useCallback(({ title, url, favicon }) => {
-    if (!url || url === "browser://new-tab") {
+  const [error, setError] = useState("");
+
+  const loadBookmarks = useCallback(async () => {
+    if (!isAuthenticated) {
+      setBookmarks(getLocalBookmarks());
+
+      setLoading(false);
+      setError("");
+
       return;
     }
 
-    setBookmarks((current) => {
-      const alreadyExists = current.some((bookmark) => bookmark.url === url);
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await fetchBookmarks();
+
+      setBookmarks(Array.isArray(result) ? result : []);
+    } catch (requestError) {
+      setError(requestError?.message || "Unable to load bookmarks.");
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    loadBookmarks();
+  }, [loadBookmarks, user?.id]);
+
+  const persistBookmarks = useCallback(
+    (nextBookmarks) => {
+      if (isAuthenticated) {
+        setBookmarks(Array.isArray(nextBookmarks) ? nextBookmarks : []);
+
+        return;
+      }
+
+      const next = Array.isArray(nextBookmarks) ? nextBookmarks : [];
+
+      setBookmarks(next);
+
+      saveStoredData(STORAGE_KEYS.bookmarks, next);
+    },
+    [isAuthenticated],
+  );
+
+  const addBookmark = useCallback(
+    async ({ title, url, favicon }) => {
+      if (!url || url === "browser://new-tab") {
+        return null;
+      }
+
+      const alreadyExists = bookmarks.some((bookmark) => bookmark.url === url);
 
       if (alreadyExists) {
-        return current;
+        return null;
+      }
+
+      if (isAuthenticated) {
+        try {
+          setError("");
+
+          const savedBookmark = await createBookmark({
+            title: title || url,
+
+            url,
+
+            favicon: favicon || null,
+          });
+
+          setBookmarks((current) => [savedBookmark, ...current]);
+
+          return savedBookmark;
+        } catch (requestError) {
+          setError(requestError?.message || "Unable to save bookmark.");
+
+          return null;
+        }
       }
 
       const bookmark = {
@@ -51,33 +131,88 @@ export function BookmarkProvider({ children }) {
         createdAt: new Date().toISOString(),
       };
 
-      const next = [bookmark, ...current];
+      setBookmarks((current) => {
+        const next = [bookmark, ...current];
 
-      saveStoredData(STORAGE_KEYS.bookmarks, next);
+        saveStoredData(STORAGE_KEYS.bookmarks, next);
 
-      return next;
-    });
-  }, []);
+        return next;
+      });
 
-  const removeBookmark = useCallback((bookmarkId) => {
-    setBookmarks((current) => {
-      const next = current.filter((bookmark) => bookmark.id !== bookmarkId);
+      return bookmark;
+    },
+    [bookmarks, isAuthenticated],
+  );
 
-      saveStoredData(STORAGE_KEYS.bookmarks, next);
+  const removeBookmark = useCallback(
+    async (bookmarkId) => {
+      if (bookmarkId === null || bookmarkId === undefined) {
+        return;
+      }
 
-      return next;
-    });
-  }, []);
+      if (isAuthenticated) {
+        try {
+          setError("");
 
-  const removeBookmarkByUrl = useCallback((url) => {
-    setBookmarks((current) => {
-      const next = current.filter((bookmark) => bookmark.url !== url);
+          await deleteBookmark(bookmarkId);
 
-      saveStoredData(STORAGE_KEYS.bookmarks, next);
+          setBookmarks((current) =>
+            current.filter((bookmark) => bookmark.id !== bookmarkId),
+          );
+        } catch (requestError) {
+          setError(requestError?.message || "Unable to delete bookmark.");
+        }
 
-      return next;
-    });
-  }, []);
+        return;
+      }
+
+      setBookmarks((current) => {
+        const next = current.filter((bookmark) => bookmark.id !== bookmarkId);
+
+        saveStoredData(STORAGE_KEYS.bookmarks, next);
+
+        return next;
+      });
+    },
+    [isAuthenticated],
+  );
+
+  const removeBookmarkByUrl = useCallback(
+    async (url) => {
+      if (!url) {
+        return;
+      }
+
+      const bookmark = bookmarks.find((item) => item.url === url);
+
+      if (!bookmark) {
+        return;
+      }
+
+      if (isAuthenticated) {
+        try {
+          setError("");
+
+          await deleteBookmark(bookmark.id);
+
+          setBookmarks((current) => current.filter((item) => item.url !== url));
+        } catch (requestError) {
+          setError(requestError?.message || "Unable to delete bookmark.");
+        }
+
+        return;
+      }
+
+      setBookmarks((current) => {
+        const next = current.filter((item) => item.url !== url);
+
+        saveStoredData(STORAGE_KEYS.bookmarks, next);
+
+        return next;
+      });
+    },
+    [bookmarks, isAuthenticated],
+  );
 
   const isBookmarked = useCallback(
     (url) => {
@@ -93,27 +228,54 @@ export function BookmarkProvider({ children }) {
     [bookmarks],
   );
 
+  const clearError = useCallback(() => {
+    setError("");
+  }, []);
+
   const value = useMemo(
     () => ({
       bookmarks,
 
+      loading,
+      error,
+
       addBookmark,
+
       removeBookmark,
+
       removeBookmarkByUrl,
 
       isBookmarked,
+
       getBookmarkByUrl,
 
       persistBookmarks,
+
+      refreshBookmarks: loadBookmarks,
+
+      clearError,
     }),
     [
       bookmarks,
+
+      loading,
+      error,
+
       addBookmark,
+
       removeBookmark,
+
       removeBookmarkByUrl,
+
       isBookmarked,
+
       getBookmarkByUrl,
+
       persistBookmarks,
+
+      loadBookmarks,
+
+      clearError,
     ],
   );
 
