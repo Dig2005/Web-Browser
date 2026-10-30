@@ -3,15 +3,8 @@ import {
   Download,
   Home,
   History,
-  Newspaper,
-  Play,
   Settings,
-  ShoppingBag,
   SlidersHorizontal,
-  Sparkles,
-  Users,
-  Wrench,
-  Plane,
 } from "lucide-react";
 
 function Sidebar({ styles, activeItem, onItemChange }) {
@@ -20,42 +13,6 @@ function Sidebar({ styles, activeItem, onItemChange }) {
       id: "home",
       label: "Home",
       icon: Home,
-    },
-
-    {
-      id: "social",
-      label: "Social",
-      icon: Users,
-    },
-
-    {
-      id: "videos",
-      label: "Videos",
-      icon: Play,
-    },
-
-    {
-      id: "shopping",
-      label: "Shopping",
-      icon: ShoppingBag,
-    },
-
-    {
-      id: "news",
-      label: "News",
-      icon: Newspaper,
-    },
-
-    {
-      id: "tools",
-      label: "Tools",
-      icon: Wrench,
-    },
-
-    {
-      id: "travel",
-      label: "Travel",
-      icon: Plane,
     },
 
     {
