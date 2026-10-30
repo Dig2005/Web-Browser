@@ -6,6 +6,8 @@ const {
 } = require("./urlResolver.cjs");
 
 const TOOLBAR_HEIGHT = 110;
+const MIN_CONTENT_TOP = TOOLBAR_HEIGHT;
+const MAX_CONTENT_TOP = 620;
 
 const ZOOM_LEVELS = [
   0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3,
@@ -83,6 +85,8 @@ class TabManager {
       view,
 
       url: "browser://new-tab",
+
+      contentTop: TOOLBAR_HEIGHT,
 
       title: "New Tab",
 
@@ -930,6 +934,8 @@ class TabManager {
 
     tab.loading = true;
 
+    tab.contentTop = TOOLBAR_HEIGHT;
+
     this.showTab(tabId);
 
     this.sendTabState(tab);
@@ -1008,6 +1014,8 @@ class TabManager {
 
     this.activeTabId = tabId;
 
+    tab.contentTop = TOOLBAR_HEIGHT;
+
     this.mainWindow.contentView.addChildView(tab.view);
 
     tab.displayed = true;
@@ -1041,7 +1049,7 @@ class TabManager {
     tab.favicon = null;
 
     tab.loading = false;
-
+    tab.contentTop = TOOLBAR_HEIGHT;
     tab.cameFromDashboard = true;
 
     tab.dashboardForwardUrl = null;
@@ -1467,21 +1475,63 @@ class TabManager {
 
     return result;
   }
+  setContentTop(tabId, requestedTop) {
+    const tab = this.getTab(tabId);
+
+    if (!tab) {
+      return {
+        success: false,
+        message: "Browser tab was not found.",
+      };
+    }
+
+    const parsedTop = Number(requestedTop);
+
+    const safeTop = Number.isFinite(parsedTop)
+      ? Math.round(parsedTop)
+      : TOOLBAR_HEIGHT;
+
+    const contentTop = Math.max(
+      MIN_CONTENT_TOP,
+      Math.min(MAX_CONTENT_TOP, safeTop),
+    );
+
+    tab.contentTop = contentTop;
+
+    if (tab.displayed) {
+      this.updateViewBounds(tab);
+    }
+
+    return {
+      success: true,
+      contentTop,
+    };
+  }
   updateViewBounds(tab) {
-    if (!tab || !tab.displayed || !this.mainWindow) {
+    if (
+      !tab ||
+      !tab.displayed ||
+      !this.mainWindow ||
+      this.mainWindow.isDestroyed()
+    ) {
       return;
     }
 
     const [width, height] = this.mainWindow.getContentSize();
 
+    const requestedTop = Number(tab.contentTop);
+
+    const contentTop = Number.isFinite(requestedTop)
+      ? Math.max(MIN_CONTENT_TOP, Math.min(MAX_CONTENT_TOP, requestedTop))
+      : TOOLBAR_HEIGHT;
+
+    const availableHeight = Math.max(0, height - contentTop);
+
     tab.view.setBounds({
       x: 0,
-
-      y: TOOLBAR_HEIGHT,
-
+      y: contentTop,
       width: Math.max(0, width),
-
-      height: Math.max(0, height - TOOLBAR_HEIGHT),
+      height: availableHeight,
     });
   }
 

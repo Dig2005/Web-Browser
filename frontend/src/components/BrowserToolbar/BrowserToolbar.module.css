@@ -408,3 +408,287 @@
     font-size: 8px;
     font-weight: 750;
 }
+
+.menuWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.profileInitial {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+
+.profileMenu,
+.browserMenu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 1500;
+    padding: 7px;
+    border: 1px solid rgba(100, 116, 218, 0.38);
+    border-radius: 14px;
+    background:
+        linear-gradient(145deg,
+            rgba(22, 27, 78, 0.99),
+            rgba(10, 17, 51, 0.99));
+    box-shadow:
+        0 20px 55px rgba(0, 0, 20, 0.62),
+        0 0 25px rgba(72, 91, 210, 0.12);
+    backdrop-filter: blur(20px);
+}
+
+.profileMenu {
+    width: 265px;
+}
+
+.browserMenu {
+    width: 255px;
+}
+
+.profileHeader {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px;
+}
+
+.profileAvatar {
+    display: grid;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 1px solid rgba(255, 202, 128, 0.65);
+    border-radius: 50%;
+    color: #ffffff;
+    background:
+        linear-gradient(135deg,
+            #6448da,
+            #e14ca2);
+    font-size: 15px;
+    font-weight: 750;
+}
+
+.profileDetails {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.profileDetails strong {
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profileDetails span {
+    overflow: hidden;
+    color: #929bc5;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.signedOutProfile {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px;
+}
+
+.signedOutProfile>div:last-child {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.signedOutProfile strong {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+.signedOutProfile span {
+    color: #9099c3;
+    font-size: 9px;
+    line-height: 1.4;
+}
+
+.signInButton,
+.createAccountButton {
+    width: 100%;
+    min-height: 36px;
+    margin-top: 6px;
+    border: 0;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.signInButton {
+    color: #ffffff;
+    background:
+        linear-gradient(135deg,
+            #338bd7,
+            #7154df);
+}
+
+.signInButton:hover {
+    background:
+        linear-gradient(135deg,
+            #42a0ee,
+            #8063ec);
+}
+
+.createAccountButton {
+    color: #bcc5e7;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.createAccountButton:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.menuDivider {
+    width: calc(100% - 8px);
+    height: 1px;
+    margin: 5px 4px;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.menuItem {
+    display: grid;
+    width: 100%;
+    min-height: 38px;
+    grid-template-columns: 23px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 7px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 9px;
+    color: #cbd0eb;
+    background: transparent;
+    font-size: 11px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.menuItem:hover:not(:disabled) {
+    color: #ffffff;
+    background: rgba(93, 107, 196, 0.17);
+}
+
+.menuItem:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.menuItem kbd {
+    padding: 2px 5px;
+    border: 1px solid rgba(122, 132, 202, 0.2);
+    border-radius: 5px;
+    color: #7781aa;
+    background: rgba(255, 255, 255, 0.04);
+    font-family: inherit;
+    font-size: 8px;
+}
+
+.logoutItem {
+    color: #ff9aaa;
+}
+
+.logoutItem:hover {
+    color: #ffbec8 !important;
+    background: rgba(234, 70, 103, 0.1) !important;
+}
+
+.zoomRow {
+    display: flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 9px;
+    color: #cbd0eb;
+    font-size: 11px;
+}
+
+.zoomRow>div {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.zoomRow button {
+    display: grid;
+    min-width: 29px;
+    height: 29px;
+    place-items: center;
+    padding: 0 6px;
+    border: 0;
+    border-radius: 7px;
+    color: #cbd0eb;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+}
+
+.zoomRow button:hover:not(:disabled) {
+    color: #ffffff;
+    background: rgba(100, 116, 214, 0.18);
+}
+
+.zoomRow button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.zoomRow .zoomPercentage {
+    min-width: 48px;
+    font-size: 9px;
+}
+
+.authOverlay {
+    position: absolute;
+    inset: 0;
+    z-index: 3000;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(2, 5, 20, 0.78);
+    backdrop-filter: blur(10px);
+}
+
+.authOverlayContent {
+    width: min(470px, 100%);
+    max-height: calc(100% - 30px);
+    overflow-y: auto;
+    border-radius: 22px;
+}
+
+.authOverlayContent>div {
+    min-height: auto;
+    padding: 0;
+    background: transparent;
+}
+
+.profileButton:focus-visible,
+.menuItem:focus-visible,
+.signInButton:focus-visible,
+.createAccountButton:focus-visible,
+.zoomRow button:focus-visible {
+    outline: 2px solid #60d6ff;
+    outline-offset: 2px;
+}
