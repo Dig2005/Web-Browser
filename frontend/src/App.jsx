@@ -1,5 +1,7 @@
 import { AuthProvider } from "./context/AuthContext";
 
+import { BackendStatusProvider } from "./context/BackendStatusContext";
+
 import { BookmarkProvider } from "./context/BookmarkContext";
 
 import { BrowserProvider } from "./context/BrowserContext";
@@ -12,17 +14,19 @@ import BrowserLayout from "./layouts/BrowserLayout/BrowserLayout";
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserProvider>
-        <BookmarkProvider>
-          <HistoryProvider>
-            <DownloadProvider>
-              <BrowserLayout />
-            </DownloadProvider>
-          </HistoryProvider>
-        </BookmarkProvider>
-      </BrowserProvider>
-    </AuthProvider>
+    <BackendStatusProvider>
+      <AuthProvider>
+        <BrowserProvider>
+          <BookmarkProvider>
+            <HistoryProvider>
+              <DownloadProvider>
+                <BrowserLayout />
+              </DownloadProvider>
+            </HistoryProvider>
+          </BookmarkProvider>
+        </BrowserProvider>
+      </AuthProvider>
+    </BackendStatusProvider>
   );
 }
 

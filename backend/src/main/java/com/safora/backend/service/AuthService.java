@@ -6,181 +6,116 @@ import com.safora.backend.dto.RegisterRequest;
 import com.safora.backend.model.User;
 import com.safora.backend.repository.UserRepository;
 import com.safora.backend.security.JwtService;
-
+import com.safora.backend.exception.BadRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
+        private final UserRepository userRepository;
 
-    private final PasswordEncoder passwordEncoder;
+        private final PasswordEncoder passwordEncoder;
 
-    private final JwtService jwtService;
+        private final JwtService jwtService;
 
-    public AuthService(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            JwtService jwtService
-    ) {
+        public AuthService(
+                        UserRepository userRepository,
+                        PasswordEncoder passwordEncoder,
+                        JwtService jwtService) {
 
-        this.userRepository = userRepository;
+                this.userRepository = userRepository;
 
-        this.passwordEncoder = passwordEncoder;
+                this.passwordEncoder = passwordEncoder;
 
-        this.jwtService = jwtService;
-    }
-
-    public AuthResponse register(
-            RegisterRequest request
-    ) {
-
-        if (
-                request.getName() == null ||
-                request.getName().trim().isEmpty()
-        ) {
-
-            throw new RuntimeException(
-                    "Name is required"
-            );
+                this.jwtService = jwtService;
         }
 
-        if (
-                request.getEmail() == null ||
-                request.getEmail().trim().isEmpty()
-        ) {
+        public AuthResponse register(
+                        RegisterRequest request) {
 
-            throw new RuntimeException(
-                    "Email is required"
-            );
+                String email = request.getEmail()
+                                .trim()
+                                .toLowerCase();
+
+                if (userRepository.existsByEmail(
+                                email)) {
+
+                        throw new BadRequestException(
+                                        "Email already registered");
+                }
+
+                User user = new User();
+
+                user.setName(
+                                request.getName()
+                                                .trim());
+
+                user.setEmail(
+                                email);
+
+                user.setPassword(
+                                passwordEncoder.encode(
+                                                request.getPassword()));
+
+                User savedUser = userRepository.save(
+                                user);
+
+                String token = jwtService.createToken(
+                                savedUser.getEmail());
+
+                return new AuthResponse(
+                                token,
+                                savedUser.getId(),
+                                savedUser.getName(),
+                                savedUser.getEmail());
         }
 
-        if (
-                request.getPassword() == null ||
-                request.getPassword().isEmpty()
-        ) {
+        public AuthResponse login(
+                        LoginRequest request) {
 
-            throw new RuntimeException(
-                    "Password is required"
-            );
+                if (request.getEmail() == null ||
+                                request.getEmail().trim().isEmpty()) {
+
+                        throw new BadRequestException(
+                                        "Email is required");
+                }
+
+                if (request.getPassword() == null ||
+                                request.getPassword().isEmpty()) {
+
+                        throw new BadRequestException(
+                                        "Password is required");
+                }
+
+                String email = request.getEmail()
+                                .trim()
+                                .toLowerCase();
+
+                User user = userRepository
+                                .findByEmail(
+                                                email)
+                                .orElseThrow(
+                                                () -> new BadRequestException(
+                                                                "Invalid email or password"));
+
+                boolean passwordMatches = passwordEncoder.matches(
+                                request.getPassword(),
+                                user.getPassword());
+
+                if (!passwordMatches) {
+
+                        throw new BadRequestException(
+                                        "Invalid email or password");
+                }
+
+                String token = jwtService.createToken(
+                                user.getEmail());
+
+                return new AuthResponse(
+                                token,
+                                user.getId(),
+                                user.getName(),
+                                user.getEmail());
         }
-
-        String email =
-                request.getEmail()
-                        .trim()
-                        .toLowerCase();
-
-        if (
-                userRepository.existsByEmail(
-                        email
-                )
-        ) {
-
-            throw new RuntimeException(
-                    "Email already registered"
-            );
-        }
-
-        User user = new User();
-
-        user.setName(
-                request.getName()
-                        .trim()
-        );
-
-        user.setEmail(
-                email
-        );
-
-        user.setPassword(
-                passwordEncoder.encode(
-                        request.getPassword()
-                )
-        );
-
-        User savedUser =
-                userRepository.save(
-                        user
-                );
-
-        String token =
-                jwtService.createToken(
-                        savedUser.getEmail()
-                );
-
-        return new AuthResponse(
-                token,
-                savedUser.getId(),
-                savedUser.getName(),
-                savedUser.getEmail()
-        );
-    }
-
-    public AuthResponse login(
-            LoginRequest request
-    ) {
-
-        if (
-                request.getEmail() == null ||
-                request.getEmail().trim().isEmpty()
-        ) {
-
-            throw new RuntimeException(
-                    "Email is required"
-            );
-        }
-
-        if (
-                request.getPassword() == null ||
-                request.getPassword().isEmpty()
-        ) {
-
-            throw new RuntimeException(
-                    "Password is required"
-            );
-        }
-
-        String email =
-                request.getEmail()
-                        .trim()
-                        .toLowerCase();
-
-        User user =
-                userRepository
-                        .findByEmail(
-                                email
-                        )
-                        .orElseThrow(
-                                () ->
-                                        new RuntimeException(
-                                                "Invalid email or password"
-                                        )
-                        );
-
-        boolean passwordMatches =
-                passwordEncoder.matches(
-                        request.getPassword(),
-                        user.getPassword()
-                );
-
-        if (!passwordMatches) {
-
-            throw new RuntimeException(
-                    "Invalid email or password"
-            );
-        }
-
-        String token =
-                jwtService.createToken(
-                        user.getEmail()
-                );
-
-        return new AuthResponse(
-                token,
-                user.getId(),
-                user.getName(),
-                user.getEmail()
-        );
-    }
 }

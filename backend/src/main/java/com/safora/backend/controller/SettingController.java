@@ -15,43 +15,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/settings")
 public class SettingController {
 
-    private final SettingService
-            settingService;
+        private final SettingService settingService;
 
-    public SettingController(
-            SettingService settingService
-    ) {
+        public SettingController(SettingService settingService) {
+                this.settingService = settingService;
+        }
 
-        this.settingService =
-                settingService;
-    }
+        @GetMapping
+        public BrowserSetting getSettings(Authentication authentication) {
+                return settingService.getSettings(authentication.getName());
+        }
 
-    @GetMapping
-    public BrowserSetting getSettings(
-            Authentication authentication
-    ) {
-
-        return settingService
-                .getSettings(
-                        authentication
-                                .getName()
-                );
-    }
-
-    @PutMapping
-    public BrowserSetting updateSettings(
-            Authentication authentication,
-
-            @RequestBody
-            BrowserSetting settings
-    ) {
-
-        return settingService
-                .updateSettings(
-                        authentication
-                                .getName(),
-
-                        settings
-                );
-    }
+        @PutMapping
+        public BrowserSetting updateSettings(Authentication authentication, @RequestBody BrowserSetting settings) {
+                return settingService.updateSettings(authentication.getName(), settings);
+        }
 }

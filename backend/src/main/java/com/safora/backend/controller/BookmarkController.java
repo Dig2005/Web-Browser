@@ -19,60 +19,25 @@ import java.util.List;
 @RequestMapping("/api/bookmarks")
 public class BookmarkController {
 
-    private final BookmarkService
-            bookmarkService;
+        private final BookmarkService bookmarkService;
 
-    public BookmarkController(
-            BookmarkService bookmarkService
-    ) {
+        public BookmarkController(BookmarkService bookmarkService) {
+                this.bookmarkService = bookmarkService;
+        }
 
-        this.bookmarkService =
-                bookmarkService;
-    }
+        @GetMapping
+        public List<Bookmark> getBookmarks(Authentication authentication) {
+                return bookmarkService.getBookmarks(authentication.getName());
+        }
 
-    @GetMapping
-    public List<Bookmark> getBookmarks(
-            Authentication authentication
-    ) {
+        @PostMapping
+        public Bookmark addBookmark(Authentication authentication, @RequestBody Bookmark bookmark) {
+                return bookmarkService
+                                .addBookmark(authentication.getName(), bookmark);
+        }
 
-        return bookmarkService
-                .getBookmarks(
-                        authentication
-                                .getName()
-                );
-    }
-
-    @PostMapping
-    public Bookmark addBookmark(
-            Authentication authentication,
-
-            @RequestBody
-            Bookmark bookmark
-    ) {
-
-        return bookmarkService
-                .addBookmark(
-                        authentication
-                                .getName(),
-
-                        bookmark
-                );
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteBookmark(
-            Authentication authentication,
-
-            @PathVariable
-            Long id
-    ) {
-
-        bookmarkService
-                .deleteBookmark(
-                        authentication
-                                .getName(),
-
-                        id
-                );
-    }
+        @DeleteMapping("/{id}")
+        public void deleteBookmark(Authentication authentication, @PathVariable Long id) {
+                bookmarkService.deleteBookmark(authentication.getName(), id);
+        }
 }

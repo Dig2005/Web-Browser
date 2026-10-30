@@ -17,68 +17,30 @@ import java.util.List;
 @RequestMapping("/api/shortcuts")
 public class ShortcutController {
 
-    private final ShortcutService shortcutService;
+        private final ShortcutService shortcutService;
 
-    public ShortcutController(ShortcutService shortcutService) {
-        this.shortcutService =
-                shortcutService;
-    }
+        public ShortcutController(ShortcutService shortcutService) {
+                this.shortcutService = shortcutService;
+        }
 
-    @GetMapping
-    public List<Shortcut> getShortcuts(Authentication authentication) {
-        return shortcutService
-                .getShortcuts(
-                        authentication
-                                .getName()
-                );
-    }
+        @GetMapping
+        public List<Shortcut> getShortcuts(Authentication authentication) {
+                return shortcutService.getShortcuts(authentication.getName());
+        }
 
-    @PostMapping
-    public Shortcut addShortcut(Authentication authentication, @RequestBody Shortcut shortcut) {
+        @PostMapping
+        public Shortcut addShortcut(Authentication authentication, @RequestBody Shortcut shortcut) {
+                return shortcutService.addShortcut(authentication.getName(), shortcut);
+        }
 
-        return shortcutService
-                .addShortcut(
-                        authentication
-                                .getName(),
+        @PutMapping("/{id}")
+        public Shortcut updateShortcut(Authentication authentication, @PathVariable Long id,
+                        @RequestBody Shortcut shortcut) {
+                return shortcutService.updateShortcut(authentication.getName(), id, shortcut);
+        }
 
-                        shortcut
-                );
-    }
-@PutMapping("/{id}")
-public Shortcut updateShortcut(
-        Authentication authentication,
-
-        @PathVariable
-        Long id,
-
-        @RequestBody
-        Shortcut shortcut
-) {
-
-    return shortcutService
-            .updateShortcut(
-                    authentication
-                            .getName(),
-
-                    id,
-
-                    shortcut
-            );
-}
-    @DeleteMapping("/{id}")
-    public void deleteShortcut(
-            Authentication authentication,
-
-            @PathVariable
-            Long id
-    ) {
-
-        shortcutService
-                .deleteShortcut(
-                        authentication
-                                .getName(),
-
-                        id
-                );
-    }
+        @DeleteMapping("/{id}")
+        public void deleteShortcut(Authentication authentication, @PathVariable Long id) {
+                shortcutService.deleteShortcut(authentication.getName(), id);
+        }
 }

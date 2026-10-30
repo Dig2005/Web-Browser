@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -113,7 +114,22 @@ export function AuthProvider({ children }) {
     setUser(null);
     setError("");
   }, []);
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      clearAuthData();
 
+      setToken(null);
+      setUser(null);
+
+      setError("Your session expired. Sign in again.");
+    };
+
+    window.addEventListener("safora:auth-expired", handleAuthExpired);
+
+    return () => {
+      window.removeEventListener("safora:auth-expired", handleAuthExpired);
+    };
+  }, []);
   const clearError = useCallback(() => {
     setError("");
   }, []);
