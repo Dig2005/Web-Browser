@@ -2018,3 +2018,154 @@
             1fr;
     }
 }
+
+.clickableCard {
+    cursor: pointer;
+}
+
+.clickableCard:focus-visible {
+    outline: 2px solid #64d8ff;
+    outline-offset: 2px;
+}
+
+.notesTextarea {
+    width: 100%;
+    min-height: 135px;
+    resize: vertical;
+    padding: 11px;
+    border: 1px solid rgba(105, 119, 204, 0.42);
+    border-radius: 10px;
+    outline: none;
+    color: #ffffff;
+    background: rgba(23, 30, 81, 0.78);
+    font: inherit;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.notesTextarea:focus {
+    border-color: #62d8ff;
+    box-shadow: 0 0 0 3px rgba(98, 216, 255, 0.08);
+}
+
+.notesActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.notesActions button {
+    display: flex;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 12px;
+    border-radius: 8px;
+    color: #ffffff;
+    background: rgba(93, 67, 190, 0.55);
+    cursor: pointer;
+}
+
+.youtubePlayerVisual {
+    position: relative;
+    width: 200px;
+    min-width: 200px;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 14px;
+    background:
+        linear-gradient(145deg,
+            #4d48b7,
+            #d74d9a 50%,
+            #ffb054);
+}
+
+.youtubePlayerElement,
+.youtubePlayerElement iframe {
+    display: block;
+    width: 200px !important;
+    height: 200px !important;
+    border: 0;
+}
+
+.musicPlayer .musicContent {
+    grid-template-columns: 200px minmax(0, 1fr);
+}
+
+.musicSeek {
+    width: 100%;
+    height: 5px;
+    accent-color: #59d8ff;
+    cursor: pointer;
+}
+
+.musicSeek:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+.musicError {
+    margin: 7px 0 0;
+    color: #ff9baa;
+    font-size: 10px;
+}
+
+.activePlayerControl {
+    color: #63dcff !important;
+    background: rgba(74, 174, 255, 0.13) !important;
+    border-radius: 8px;
+}
+
+.playerControls button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.carouselDots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.carouselDots button {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #3a427f;
+    cursor: pointer;
+}
+
+.carouselDots button.activeDot {
+    background: #f1f2ff;
+    box-shadow: 0 0 8px rgba(241, 242, 255, 0.5);
+}
+
+.travelSlide1 {
+    filter: hue-rotate(0deg);
+}
+
+.travelSlide2 {
+    filter: hue-rotate(25deg) saturate(1.1);
+}
+
+.travelSlide3 {
+    filter: hue-rotate(65deg) saturate(0.9);
+}
+
+.travelSlide4 {
+    filter: hue-rotate(110deg) saturate(1.05);
+}
+
+@media (max-width: 800px) {
+    .musicPlayer .musicContent {
+        grid-template-columns: 1fr;
+    }
+
+    .youtubePlayerVisual {
+        margin-inline: auto;
+    }
+}
